@@ -1,0 +1,17 @@
+{
+  "name": "memory-consumers-slicer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-generator": "^6.26.1",
+    "babel-plugin-tester": "^9.2.0",
+    "generator-babel-plugin": "^2.0.1",
+    "jest": "^26.0.1"
+  }
+}
