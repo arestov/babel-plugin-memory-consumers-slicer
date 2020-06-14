@@ -110,12 +110,12 @@ module.exports = function logger(babel) {
   return {
     name: 'mem',
     pre() {
-      this.memory_constructors = {}
+      this.memory_constructors = []
     },
     post(root) {
       var pluginContext = this
 
-      var list = Object.keys(pluginContext.memory_constructors)
+      var list = pluginContext.memory_constructors
       if (!list.length) {
         return
       }
@@ -177,7 +177,7 @@ module.exports = function logger(babel) {
             FN_NAME: t.identifier(memoryConstructorName)
           })
 
-          pluginContext.memory_constructors[memoryConstructorName] = true
+          pluginContext.memory_constructors.push(memoryConstructorName)
 
           path.replaceWith(callConstr({
             FN_NAME: t.identifier(memoryConstructorName)
