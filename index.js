@@ -44,22 +44,6 @@ module.exports = function logger(babel) {
         return
       }
 
-      root.path.traverse({
-        BlockStatement: {
-          enter: path => {
-            if (pluginContext.list_injected) {
-              return
-            }
-
-            if (!isAmdBody(path)) {
-              return
-            }
-
-            insertTo(path, list)
-          },
-        },
-      })
-
       function insertTo(path, list) {
         if (pluginContext.list_injected) {
           return
@@ -90,6 +74,22 @@ module.exports = function logger(babel) {
           path.unshiftContainer('body', constr)
         }
       }
+
+      root.path.traverse({
+        BlockStatement: {
+          enter: path => {
+            if (pluginContext.list_injected) {
+              return
+            }
+
+            if (!isAmdBody(path)) {
+              return
+            }
+
+            insertTo(path, list)
+          },
+        },
+      })
 
       insertTo(root.path, list)
 
