@@ -29,16 +29,6 @@ module.exports = function logger(babel) {
     this.prop = arg
   `
 
-  var isProgram = function(path) {
-    return path.isProgram()
-  }
-
-
-  var getProgram = function(path) {
-    var cur = path.findParent(isProgram)
-    return cur
-  }
-
   return {
     name: 'mem',
     pre() {
