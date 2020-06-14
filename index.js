@@ -1,5 +1,5 @@
 const isAmdBody = require('./src/isAmdBody')
-const getFunctionName = require('./src/getFunctionName')
+const makeObjectReplacer = require('./src/object/make')
 
 function docs(path) {
   if (false && path) {
@@ -16,20 +16,7 @@ function docBabel(bab) {
 module.exports = function logger(babel) {
   docBabel(babel)
 
-  const t = babel.types
-
-  const makeConstr = babel.template`
-    function FN_NAME() {
-    }
-  `
-
-  const callConstr = babel.template`
-    new FN_NAME()
-  `
-
-  const makeProp = babel.template`
-    this.prop = arg
-  `
+  const handleObject = makeObjectReplacer(babel)
 
   return {
     name: 'mem',
@@ -53,23 +40,7 @@ module.exports = function logger(babel) {
         for (let i = list.length - 1; i >= 0; i--) {
           const item = list[i]
 
-          const constr = makeConstr({
-            FN_NAME: t.identifier(item.name),
-          })
-
-          const params = item.props.map((_, i) => {
-            return t.identifier(`arg${i}`)
-          })
-
-          const props = item.props.map((sourceProp, i) => {
-            const prop = makeProp()
-            prop.expression.left.property = sourceProp
-            prop.expression.right = t.identifier(`arg${i}`)
-            return prop
-          })
-
-          constr.params = params
-          constr.body.body = props
+          const constr = handleObject.placeConstructor(item)
 
           path.unshiftContainer('body', constr)
         }
@@ -100,38 +71,7 @@ module.exports = function logger(babel) {
       ObjectExpression: {
         exit(path, pluginContext) {
           docs(path)
-
-          const { properties } = path.node
-
-          if (
-            properties.some(item => {
-              return item.type !== 'ObjectProperty' && item.type !== 'StringLiteral'
-            })
-          ) {
-            return
-          }
-
-          const funcName = getFunctionName(path)
-
-          const pos = path.node.loc.start
-
-          const postFix = funcName ? `__${funcName}` : ''
-          const memoryConstructorName = `CustomMemGroup_line_${pos.line}_column_${pos.column}${postFix}`
-
-          pluginContext.memory_constructors.push({
-            name: memoryConstructorName,
-            props: properties.map(({ key }) => key),
-          })
-
-          const expressedCall = callConstr({
-            FN_NAME: t.identifier(memoryConstructorName),
-          })
-
-          const args = properties.map(({ value }) => t.cloneNode(value))
-
-          expressedCall.expression.arguments = args
-
-          path.replaceWith(expressedCall)
+          handleObject.matchAndReplace(pluginContext, path)
         },
       },
     },
