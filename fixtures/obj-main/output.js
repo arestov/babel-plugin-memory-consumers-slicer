@@ -8,6 +8,11 @@ function CustomMemGroup_line_19_column_15__propname1() {}
 
 function CustomMemGroup_line_23_column_15__propname2() {}
 
+function CustomMemGroup_line_17_column_10(arg0, arg1) {
+  this.propname1 = arg0;
+  this.propname2 = arg1;
+}
+
 function CustomMemGroup_line_30_column_15__methodname() {}
 
 function funcname() {
@@ -25,16 +30,16 @@ var varname2 = () => {
   return data;
 };
 
-var obj = {
-  propname1: function () {
+var obj = new CustomMemGroup_line_17_column_10(
+  function () {
     var data = new CustomMemGroup_line_19_column_15__propname1();
     return data;
   },
-  propname2: () => {
+  () => {
     var data = new CustomMemGroup_line_23_column_15__propname2();
     return data;
-  },
-};
+  }
+);
 
 class User {
   methodname() {
