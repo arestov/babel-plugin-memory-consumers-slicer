@@ -1,10 +1,8 @@
-
 function isAmdBody(path) {
-
-  var okFunc = path => {
+  const okFunc = path => {
     switch (path.node.type) {
-      case "FunctionExpression":
-      case "ArrowFunctionExpression":
+      case 'FunctionExpression':
+      case 'ArrowFunctionExpression':
         return true
       default: {
         return false
@@ -12,20 +10,20 @@ function isAmdBody(path) {
     }
   }
 
-  var func = okFunc(path.parentPath) && path.parentPath
+  const func = okFunc(path.parentPath) && path.parentPath
 
   if (!func) {
-    return
+    return false
   }
 
-  var funcParent = func.parentPath
+  const funcParent = func.parentPath
 
-  if (funcParent.node.type !== 'CallExpression' || funcParent.node.callee.name !== 'define')  {
-    return
+  if (funcParent.node.type !== 'CallExpression' || funcParent.node.callee.name !== 'define') {
+    return false
   }
 
   if (funcParent.scope.path.node.type !== 'Program') {
-    return
+    return false
   }
 
   return true

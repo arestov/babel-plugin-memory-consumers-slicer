@@ -1,10 +1,9 @@
-const pluginTester = require('babel-plugin-tester');
+const pluginTester = require('babel-plugin-tester')
 
-const plugin =  require('./index');
-
-const path = require('path');
+const path = require('path')
+const plugin = require('./index')
 
 pluginTester.default({
   plugin,
-  fixtures: path.join(__dirname, 'fixtures')
+  fixtures: path.join(__dirname, 'fixtures'),
 })

@@ -1,20 +1,22 @@
-var {default: generate} = require("babel-generator");
-var isAmdBody = require('./src/isAmdBody')
-var getFunctionName = require('./src/getFunctionName')
+const isAmdBody = require('./src/isAmdBody')
+const getFunctionName = require('./src/getFunctionName')
 
 function docs(path) {
-  // console.log(path.constructor.prototype)
+  if (false && path) {
+    // console.log(path.constructor.prototype)
+  }
 }
 
 function docBabel(bab) {
-  // console.log('babel', Object.keys(bab))
-
+  if (false && bab) {
+    // console.log('babel', Object.keys(bab))
+  }
 }
 
 module.exports = function logger(babel) {
   docBabel(babel)
 
-  var t = babel.types
+  const t = babel.types
 
   const makeConstr = babel.template`
     function FN_NAME() {
@@ -35,17 +37,16 @@ module.exports = function logger(babel) {
       this.memory_constructors = []
     },
     post(root) {
-      var pluginContext = this
+      const pluginContext = this
 
-      var list = pluginContext.memory_constructors
+      const list = pluginContext.memory_constructors
       if (!list.length) {
         return
       }
 
-
       root.path.traverse({
         BlockStatement: {
-          enter: (path) => {
+          enter: path => {
             if (pluginContext.list_injected) {
               return
             }
@@ -55,8 +56,8 @@ module.exports = function logger(babel) {
             }
 
             insertTo(path, list)
-          }
-        }
+          },
+        },
       })
 
       function insertTo(path, list) {
@@ -64,20 +65,20 @@ module.exports = function logger(babel) {
           return
         }
         pluginContext.list_injected = true
-        for (var i = list.length-1; i >= 0; i--) {
-          var item = list[i]
+        // eslint-disable-next-line no-plusplus
+        for (let i = list.length - 1; i >= 0; i--) {
+          const item = list[i]
 
-
-          var constr = makeConstr({
+          const constr = makeConstr({
             FN_NAME: t.identifier(item.name),
           })
 
-          var params = item.props.map((_, i) => {
+          const params = item.props.map((_, i) => {
             return t.identifier(`arg${i}`)
           })
 
-          var props = item.props.map((sourceProp, i) => {
-            var prop = makeProp()
+          const props = item.props.map((sourceProp, i) => {
+            const prop = makeProp()
             prop.expression.left.property = sourceProp
             prop.expression.right = t.identifier(`arg${i}`)
             return prop
@@ -86,8 +87,7 @@ module.exports = function logger(babel) {
           constr.params = params
           constr.body.body = props
 
-
-          path.unshiftContainer('body', constr);
+          path.unshiftContainer('body', constr)
         }
       }
 
@@ -101,39 +101,39 @@ module.exports = function logger(babel) {
         exit(path, pluginContext) {
           docs(path)
 
-          var properties = path.node.properties
+          const { properties } = path.node
 
-          if (properties.some(item => {
-            return item.type !== 'ObjectProperty' && item.type !== 'StringLiteral'
-          })) {
+          if (
+            properties.some(item => {
+              return item.type !== 'ObjectProperty' && item.type !== 'StringLiteral'
+            })
+          ) {
             return
           }
 
+          const funcName = getFunctionName(path)
 
-          var funcName = getFunctionName(path)
-
-          var pos = path.node.loc.start
+          const pos = path.node.loc.start
 
           const postFix = funcName ? `__${funcName}` : ''
           const memoryConstructorName = `CustomMemGroup_line_${pos.line}_column_${pos.column}${postFix}`
 
           pluginContext.memory_constructors.push({
             name: memoryConstructorName,
-            props: properties.map(({key}) => key),
+            props: properties.map(({ key }) => key),
           })
 
-          var expressedCall = callConstr({
-            FN_NAME: t.identifier(memoryConstructorName)
+          const expressedCall = callConstr({
+            FN_NAME: t.identifier(memoryConstructorName),
           })
 
-          var args = properties.map(({value}) => t.cloneNode(value))
+          const args = properties.map(({ value }) => t.cloneNode(value))
 
           expressedCall.expression.arguments = args
 
           path.replaceWith(expressedCall)
-
         },
       },
-    }
-  };
+    },
+  }
 }

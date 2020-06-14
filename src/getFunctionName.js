@@ -1,9 +1,8 @@
-
 function parentName(path) {
   switch (path.node.type) {
-    case "VariableDeclarator":
+    case 'VariableDeclarator':
       return path.node.id.name
-    case "ObjectProperty":
+    case 'ObjectProperty':
       return path.node.key.name
     default:
       return null
@@ -11,12 +10,12 @@ function parentName(path) {
 }
 
 function getFunctionName(path) {
-  var func = path.findParent(path => {
+  const func = path.findParent(path => {
     switch (path.node.type) {
-      case "FunctionDeclaration":
-      case "FunctionExpression":
-      case "ArrowFunctionExpression":
-      case "ClassMethod":
+      case 'FunctionDeclaration':
+      case 'FunctionExpression':
+      case 'ArrowFunctionExpression':
+      case 'ClassMethod':
         return true
       default: {
         return false
@@ -24,16 +23,16 @@ function getFunctionName(path) {
     }
   })
   if (!func) {
-    return
+    return null
   }
   switch (func.node.type) {
-    case "FunctionDeclaration":
+    case 'FunctionDeclaration':
       return func.node.id.name
-    case "ClassMethod":
+    case 'ClassMethod':
       return func.node.key.name
-    case "FunctionExpression":
+    case 'FunctionExpression':
       return func.node.id ? func.node.id.name : parentName(func.parentPath)
-    case "ArrowFunctionExpression":
+    case 'ArrowFunctionExpression':
       return parentName(func.parentPath)
     default:
       return null
