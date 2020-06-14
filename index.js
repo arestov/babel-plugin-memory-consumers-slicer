@@ -1,4 +1,5 @@
 var {default: generate} = require("babel-generator");
+var isAmdBody = require('./src/isAmdBody')
 
 function docs(path) {
   // console.log(path.constructor.prototype)
@@ -7,38 +8,6 @@ function docs(path) {
 function docBabel(bab) {
   // console.log('babel', Object.keys(bab))
 
-}
-
-function isAmdBody(path) {
-
-  var okFunc = path => {
-    switch (path.node.type) {
-      case "FunctionExpression":
-      case "ArrowFunctionExpression":
-        return true
-      default: {
-        return false
-      }
-    }
-  }
-
-  var func = okFunc(path.parentPath) && path.parentPath
-
-  if (!func) {
-    return
-  }
-
-  var funcParent = func.parentPath
-
-  if (funcParent.node.type !== 'CallExpression' || funcParent.node.callee.name !== 'define')  {
-    return
-  }
-
-  if (funcParent.scope.path.node.type !== 'Program') {
-    return
-  }
-
-  return true
 }
 
 function parentName(path) {
