@@ -85,14 +85,18 @@ module.exports = function logger(babel) {
         return
       }
 
-      for (var i = list.length-1; i >= 0; i--) {
-        var item = list[i]
+      function insertTo(path, list) {
+        for (var i = list.length-1; i >= 0; i--) {
+          var item = list[i]
 
-        var constr = makeConstr({
-          FN_NAME: t.identifier(item)
-        })
-        root.path.unshiftContainer('body', constr);
+          var constr = makeConstr({
+            FN_NAME: t.identifier(item)
+          })
+          root.path.unshiftContainer('body', constr);
+        }
       }
+
+      insertTo(root.path, list)
 
     },
     visitor: {
