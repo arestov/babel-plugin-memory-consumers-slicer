@@ -95,7 +95,7 @@ module.exports = function logger(babel) {
           var constr = makeConstr({
             FN_NAME: t.identifier(item)
           })
-          root.path.unshiftContainer('body', constr);
+          path.unshiftContainer('body', constr);
         }
       }
 
