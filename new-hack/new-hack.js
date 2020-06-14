@@ -9,6 +9,38 @@ function docBabel(bab) {
 
 }
 
+function isAmdBody(path) {
+
+  var okFunc = path => {
+    switch (path.node.type) {
+      case "FunctionExpression":
+      case "ArrowFunctionExpression":
+        return true
+      default: {
+        return false
+      }
+    }
+  }
+
+  var func = okFunc(path.parentPath) && path.parentPath
+
+  if (!func) {
+    return
+  }
+
+  var funcParent = func.parentPath
+
+  if (funcParent.node.type !== 'CallExpression' || funcParent.node.callee.name !== 'define')  {
+    return
+  }
+
+  if (funcParent.scope.path.node.type !== 'Program') {
+    return
+  }
+
+  return true
+}
+
 function parentName(path) {
   switch (path.node.type) {
     case "VariableDeclarator":
@@ -88,7 +120,28 @@ module.exports = function logger(babel) {
         return
       }
 
+
+      root.path.traverse({
+        BlockStatement: {
+          enter: (path) => {
+            if (pluginContext.list_injected) {
+              return
+            }
+
+            if (!isAmdBody(path)) {
+              return
+            }
+
+            insertTo(path, list)
+          }
+        }
+      })
+
       function insertTo(path, list) {
+        if (pluginContext.list_injected) {
+          return
+        }
+        pluginContext.list_injected = true
         for (var i = list.length-1; i >= 0; i--) {
           var item = list[i]
 
