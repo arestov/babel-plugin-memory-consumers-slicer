@@ -81,7 +81,9 @@ module.exports = function logger(babel) {
       this.memory_constructors = {}
     },
     post(root) {
-      var list = Object.keys(this.memory_constructors)
+      var pluginContext = this
+
+      var list = Object.keys(pluginContext.memory_constructors)
       if (!list.length) {
         return
       }
@@ -99,6 +101,8 @@ module.exports = function logger(babel) {
 
       insertTo(root.path, list)
 
+      pluginContext.memory_constructors = null
+      pluginContext.list_injected = null
     },
     visitor: {
       ObjectExpression: {
@@ -120,7 +124,7 @@ module.exports = function logger(babel) {
             FN_NAME: t.identifier(memoryConstructorName)
           })
 
-          this.memory_constructors[memoryConstructorName] = true
+          pluginContext.memory_constructors[memoryConstructorName] = true
 
           path.replaceWith(callConstr({
             FN_NAME: t.identifier(memoryConstructorName)
