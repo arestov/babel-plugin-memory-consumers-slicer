@@ -42,6 +42,7 @@ function getFunctionName(path) {
     case "ClassMethod":
       return func.node.key.name
     case "FunctionExpression":
+      return func.node.id ? func.node.id.name : parentName(func.parentPath)
     case "ArrowFunctionExpression":
       return parentName(func.parentPath)
     default:
