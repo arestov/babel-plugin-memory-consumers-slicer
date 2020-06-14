@@ -97,6 +97,10 @@ module.exports = function logger(babel) {
     new FN_NAME()
   `
 
+  const makeProp = babel.template`
+    this.prop = arg
+  `
+
   var isProgram = function(path) {
     return path.isProgram()
   }
@@ -145,9 +149,26 @@ module.exports = function logger(babel) {
         for (var i = list.length-1; i >= 0; i--) {
           var item = list[i]
 
+
           var constr = makeConstr({
-            FN_NAME: t.identifier(item)
+            FN_NAME: t.identifier(item.name),
           })
+
+          var params = item.props.map((_, i) => {
+            return t.identifier(`arg${i}`)
+          })
+
+          var props = item.props.map((sourceProp, i) => {
+            var prop = makeProp()
+            prop.expression.left.property = sourceProp
+            prop.expression.right = t.identifier(`arg${i}`)
+            return prop
+          })
+
+          constr.params = params
+          constr.body.body = props
+
+
           path.unshiftContainer('body', constr);
         }
       }
@@ -162,9 +183,14 @@ module.exports = function logger(babel) {
         exit(path, pluginContext) {
           docs(path)
 
-          if (path.node.properties.length) {
+          var properties = path.node.properties
+
+          if (properties.some(item => {
+            return item.type !== 'ObjectProperty' && item.type !== 'StringLiteral'
+          })) {
             return
           }
+
 
           var funcName = getFunctionName(path)
 
@@ -173,15 +199,20 @@ module.exports = function logger(babel) {
           const postFix = funcName ? `__${funcName}` : ''
           const memoryConstructorName = `CustomMemGroup_line_${pos.line}_column_${pos.column}${postFix}`
 
-          var constr = makeConstr({
+          pluginContext.memory_constructors.push({
+            name: memoryConstructorName,
+            props: properties.map(({key}) => key),
+          })
+
+          var expressedCall = callConstr({
             FN_NAME: t.identifier(memoryConstructorName)
           })
 
-          pluginContext.memory_constructors.push(memoryConstructorName)
+          var args = properties.map(({value}) => t.cloneNode(value))
 
-          path.replaceWith(callConstr({
-            FN_NAME: t.identifier(memoryConstructorName)
-          }))
+          expressedCall.expression.arguments = args
+
+          path.replaceWith(expressedCall)
 
         },
       },
