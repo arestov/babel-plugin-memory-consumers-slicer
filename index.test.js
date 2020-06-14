@@ -1,6 +1,6 @@
 const pluginTester = require('babel-plugin-tester');
 
-const plugin =  require('./new-hack');
+const plugin =  require('./index');
 
 const path = require('path');
 
