@@ -26,8 +26,9 @@ function getFunctionName(path) {
     return null
   }
   switch (func.node.type) {
-    case 'FunctionDeclaration':
-      return func.node.id.name
+    case 'FunctionDeclaration': {
+      return func.node.id && func.node.id.name
+    }
     case 'ClassMethod':
       return func.node.key.name
     case 'FunctionExpression':

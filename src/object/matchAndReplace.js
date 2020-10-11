@@ -1,4 +1,4 @@
-const getFunctionName = require('../getFunctionName')
+const constrName = require('../constrName')
 
 module.exports = (babel, callConstr) => (pluginContext, path) => {
   const t = babel.types
@@ -6,19 +6,28 @@ module.exports = (babel, callConstr) => (pluginContext, path) => {
   const { properties } = path.node
 
   if (
+    // properties.length ||
     properties.some(item => {
-      return item.type !== 'ObjectProperty' && item.type !== 'StringLiteral'
+      const notOk = item.type !== 'ObjectProperty' && item.type !== 'StringLiteral'
+      if (notOk) {
+        return true
+      }
+
+      if (item.computed) {
+        return true
+      }
+
+      if (item.value.type === 'FunctionExpression') {
+        return true
+      }
+
+      return false
     })
   ) {
     return
   }
 
-  const funcName = getFunctionName(path)
-
-  const pos = path.node.loc.start
-
-  const postFix = funcName ? `__${funcName}` : ''
-  const memoryConstructorName = `CustomMemGroup_line_${pos.line}_column_${pos.column}${postFix}`
+  const memoryConstructorName = constrName('Object', path, pluginContext)
 
   pluginContext.memory_constructors.push({
     type: 'object',

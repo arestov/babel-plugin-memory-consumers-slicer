@@ -1,8 +1,8 @@
 define(function () {
-  function CustomMemGroup_line_3_column_15__varname() {}
+  function MSlice_Object__code_line_3_column_15__varname() {}
 
   var varname = function () {
-    var data = new CustomMemGroup_line_3_column_15__varname()
+    var data = new MSlice_Object__code_line_3_column_15__varname()
     return data
   }
 })

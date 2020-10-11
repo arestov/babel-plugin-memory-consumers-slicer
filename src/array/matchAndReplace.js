@@ -1,4 +1,4 @@
-const getFunctionName = require('../getFunctionName')
+const constrName = require('../constrName')
 
 module.exports = (babel, callConstr) => (pluginContext, path) => {
   const t = babel.types
@@ -9,12 +9,7 @@ module.exports = (babel, callConstr) => (pluginContext, path) => {
     return
   }
 
-  const funcName = getFunctionName(path)
-
-  const pos = path.node.loc.start
-
-  const postFix = funcName ? `__${funcName}` : ''
-  const memoryConstructorName = `CustomMemGroup_line_${pos.line}_column_${pos.column}${postFix}`
+  const memoryConstructorName = constrName('Array', path, pluginContext)
 
   pluginContext.memory_constructors.push({
     type: 'array',
